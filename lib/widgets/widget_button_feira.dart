@@ -3,12 +3,20 @@ import 'package:flutter/material.dart';
 class ButtonFeira extends StatelessWidget {
   final String label;
   final VoidCallback onPressed;
+  final double XL;
+  final double XR;
+  final double YT;
+  final double YB;
 
   const ButtonFeira({
-    Key? key,
+    super.key,
     required this.label,
     required this.onPressed,
-  }) : super(key: key);
+    this.XL = 8,
+    this.XR = 15,
+    this.YT = 2,
+    this.YB = 2,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -45,8 +53,8 @@ class ButtonFeira extends StatelessWidget {
           child: Transform(
             transform: Matrix4.skewX(0.4),
             child: Padding(
-                padding: const EdgeInsets.only(
-                    left: 8, top: 2, right: 16, bottom: 2),
+                padding:
+                    EdgeInsets.only(left: XL, top: YT, right: XR, bottom: YB),
                 child: Text(
                   label,
                   style: const TextStyle(

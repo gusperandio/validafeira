@@ -36,7 +36,7 @@ class _EventScreenState extends State<EventScreen>
 
   void navigateToStandScreen(BuildContext context) {
     Navigator.of(context)
-        .pushReplacement(MaterialPageRoute(builder: (_) => EventScreen()));
+        .pushReplacement(MaterialPageRoute(builder: (_) => StandScreen()));
   }
 
   @override
@@ -79,8 +79,8 @@ class _EventScreenState extends State<EventScreen>
                                 color: Colors.black12,
                                 borderRadius: BorderRadius.circular(10),
                                 border: Border.all(
-                                  color: Colors.black, // Cor da borda
-                                  width: 2, // Largura da borda
+                                  color: Colors.black,
+                                  width: 2,
                                 ),
                               ),
                               child: Row(
@@ -124,15 +124,14 @@ class _EventScreenState extends State<EventScreen>
               const SizedBox(
                 height: 32,
               ),
-              _isClicked
-                  ? ButtonFeira(
-                      label: 'Continuar',
-                      onPressed: () {
-                        navigateToStandScreen(context);
-                      })
-                  : const SizedBox(
-                      height: 60,
-                    )
+              Opacity(
+                opacity: _isClicked ? 1.0 : 0.0,
+                child: ButtonFeira(
+                    label: 'Continuar',
+                    onPressed: () {
+                      navigateToStandScreen(context);
+                    }),
+              )
             ],
           ),
         ),

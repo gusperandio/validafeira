@@ -101,42 +101,40 @@ class _LoginScreenState extends State<LoginScreen>
                 ),
               ),
             ),
-            showItem
-                ? Column(
-                    children: [
-                      Container(
-                        margin: const EdgeInsets.only(left: 0),
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 50.0, vertical: 0.0),
-                        child: const FieldFeira(label: "E-mail", pass: false),
-                      ),
-                      const SizedBox(
-                        height: 20,
-                      ),
-                      Container(
-                        margin: const EdgeInsets.only(left: 0),
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 50.0, vertical: 0.0),
-                        child: const FieldFeira(label: "Senha", pass: true),
-                      ),
-                      const SizedBox(
-                        height: 20,
-                      ),
-                      Container(
-                        margin: const EdgeInsets.only(left: 24),
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 50.0, vertical: 0.0),
-                        child: ButtonFeira(
-                            label: 'Acessar',
-                            onPressed: () {
-                              navigateToEventScreen(context);
-                            }),
-                      )
-                    ],
-                  )
-                : const SizedBox(
-                    height: 202,
-                  ),
+            Opacity(
+                opacity: showItem ? 1.0 : 0.0,
+                child: Column(
+                  children: [
+                    Container(
+                      margin: const EdgeInsets.only(left: 0),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 50.0, vertical: 0.0),
+                      child: const FieldFeira(label: "E-mail", pass: false),
+                    ),
+                    const SizedBox(
+                      height: 20,
+                    ),
+                    Container(
+                      margin: const EdgeInsets.only(left: 0),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 50.0, vertical: 0.0),
+                      child: const FieldFeira(label: "Senha", pass: true),
+                    ),
+                    const SizedBox(
+                      height: 20,
+                    ),
+                    Container(
+                      margin: const EdgeInsets.only(left: 24),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 50.0, vertical: 0.0),
+                      child: ButtonFeira(
+                          label: 'Acessar',
+                          onPressed: () {
+                            navigateToEventScreen(context);
+                          }),
+                    )
+                  ],
+                )),
             // DropdownButton
           ],
         ),
