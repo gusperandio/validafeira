@@ -17,7 +17,7 @@ class _EventScreenState extends State<EventScreen>
   void initState() {
     super.initState();
     _controller = AnimationController(
-      duration: const Duration(seconds: 3), // Duração de uma rotação completa
+      duration: const Duration(seconds: 3),
       vsync: this,
     )..repeat();
   }
@@ -98,7 +98,7 @@ class _EventScreenState extends State<EventScreen>
                                         return Transform.rotate(
                                           angle: _controller.value *
                                               2.0 *
-                                              3.141592653589793, // Rotação de 360 graus
+                                              3.141592653589793,
                                           child: child,
                                         );
                                       },

@@ -56,13 +56,7 @@ class _StandScreenState extends State<StandScreen> {
             padding:
                 const EdgeInsets.symmetric(horizontal: 20.0, vertical: 0.0),
             child: ButtonFeira(
-                label: "Confimar",
-                onPressed: () => {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => CameraScreen()),
-                      )
-                    }),
+                label: "Confimar", onPressed: () => {_dialogBuilder(context)}),
           ),
         ],
         backgroundColor: Color(0xfff4f7fe),
@@ -77,6 +71,16 @@ class _StandScreenState extends State<StandScreen> {
           ),
           child: Column(
             children: [
+              const SizedBox(height: 20),
+              const Text(
+                'Os Stands estão em ordem alfabética',
+                style: const TextStyle(
+                  fontFamily: 'AlegreyaSans',
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black,
+                ),
+              ),
               const SizedBox(height: 20),
               RadioListTile<Groceries>(
                 value: Groceries.pickles,
@@ -135,6 +139,68 @@ class _StandScreenState extends State<StandScreen> {
               ),
             ],
           )),
+    );
+  }
+
+  Future<void> _dialogBuilder(BuildContext context) {
+    return showDialog<void>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          titleTextStyle: const TextStyle(
+            fontFamily: 'AlegreyaSans',
+            fontSize: 22,
+            fontWeight: FontWeight.bold,
+            color: Colors.black,
+          ),
+          title: const Text('Confirme seu STAND'),
+          content: const Text(
+              'A dialog is a type of modal window that\n'
+              'appears in front of app content to\n'
+              'provide critical information, or prompt\n'
+              'for a decision to be made.',
+              style: const TextStyle(
+                fontFamily: 'AlegreyaSans',
+                fontSize: 14,
+                fontWeight: FontWeight.normal,
+                color: Colors.black54,
+              )),
+          actions: <Widget>[
+            TextButton(
+              style: TextButton.styleFrom(
+                textStyle: Theme.of(context).textTheme.labelLarge,
+              ),
+              child: const Text('Cancelar', style: const TextStyle(
+                fontFamily: 'AlegreyaSans',
+                fontSize: 16,
+                fontWeight: FontWeight.normal,
+                color: Colors.red,
+              ),),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              style: TextButton.styleFrom(
+                textStyle: Theme.of(context).textTheme.labelLarge,
+              ),
+              child: const Text('Confirmar', style: const TextStyle(
+                fontFamily: 'AlegreyaSans',
+                fontSize: 16,
+                fontWeight: FontWeight.normal,
+                color: Colors.black,
+              ),),
+              onPressed: () {
+                Navigator.of(context).pop();
+                Navigator.push(
+                         context,
+                         MaterialPageRoute(builder: (context) => CameraScreen()),
+                       );
+              },
+            ),
+          ],
+        );
+      },
     );
   }
 }

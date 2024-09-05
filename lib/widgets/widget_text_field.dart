@@ -16,11 +16,11 @@ class FieldFeira extends StatelessWidget {
       obscureText: pass,
       decoration: InputDecoration(
         filled: true,
-        fillColor: Colors.white, // Define o fundo branco
+        fillColor: Colors.white,
         hintText: label,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8.0),
-          borderSide: BorderSide.none, // Remove a borda padrão
+          borderSide: BorderSide.none,
         ),
       ),
       style: const TextStyle(
