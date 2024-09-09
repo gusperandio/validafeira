@@ -17,6 +17,11 @@ class _LoginScreenState extends State<LoginScreen>
   late Animation<Offset> _offsetAnimation;
   late Animation<double> _fadeAnimation;
   bool showItem = false;
+  final TextEditingController _emailValue = TextEditingController();
+  final TextEditingController _passValue = TextEditingController();
+  final FocusNode _emailFocusNode = FocusNode();
+  final FocusNode _passwordFocusNode = FocusNode();
+
   @override
   void initState() {
     super.initState();
@@ -60,12 +65,58 @@ class _LoginScreenState extends State<LoginScreen>
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual,
         overlays: SystemUiOverlay.values);
     _controller.dispose();
+    _emailValue.dispose();
+    _passValue.dispose();
+    _emailFocusNode.dispose();
+    _passwordFocusNode.dispose();
     super.dispose();
   }
 
   void navigateToEventScreen(BuildContext context) {
     Navigator.of(context)
         .pushReplacement(MaterialPageRoute(builder: (_) => EventScreen()));
+  }
+
+  void validateFields(BuildContext context) {
+    if (_emailValue.text.isEmpty && _passValue.text.isEmpty) {
+      FocusScope.of(context).requestFocus(_emailFocusNode);
+      showSnack("Informe seus dados!", context);
+      return;
+    } else if (_emailValue.text.isEmpty) {
+      showSnack("Informe o email", context);
+      FocusScope.of(context).requestFocus(_emailFocusNode);
+      return;
+    } else if (_passValue.text.isEmpty) {
+      showSnack("Informe a senha", context);
+      FocusScope.of(context).requestFocus(_passwordFocusNode);
+      return;
+    } else if (_emailValue.text == "teste" && _passValue.text == "1234") {
+      showSnack("E-mail ou Senha incorretos", context);
+      return;
+    }
+
+    navigateToEventScreen(context);
+  }
+
+  void showSnack(String text, context) {
+    final snackBar = SnackBar(
+        content: Text(
+          text,
+          style: const TextStyle(
+            fontFamily: 'AlegreyaSans',
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+          ),
+        ),
+        action: SnackBarAction(
+          label: 'Fechar',
+          onPressed: () {},
+          backgroundColor: Colors.black45,
+          textColor: Colors.white,
+        ),
+        backgroundColor: Colors.red[400]);
+    ScaffoldMessenger.of(context).showSnackBar(snackBar);
   }
 
   @override
@@ -109,7 +160,12 @@ class _LoginScreenState extends State<LoginScreen>
                       margin: const EdgeInsets.only(left: 0),
                       padding: const EdgeInsets.symmetric(
                           horizontal: 50.0, vertical: 0.0),
-                      child: const FieldFeira(label: "E-mail", pass: false),
+                      child: FieldFeira(
+                        label: "E-mail",
+                        pass: false,
+                        controller: _emailValue,
+                        focusNode: _emailFocusNode,
+                      ),
                     ),
                     const SizedBox(
                       height: 20,
@@ -118,7 +174,12 @@ class _LoginScreenState extends State<LoginScreen>
                       margin: const EdgeInsets.only(left: 0),
                       padding: const EdgeInsets.symmetric(
                           horizontal: 50.0, vertical: 0.0),
-                      child: const FieldFeira(label: "Senha", pass: true),
+                      child: FieldFeira(
+                        label: "Senha",
+                        pass: true,
+                        controller: _passValue,
+                        focusNode: _passwordFocusNode,
+                      ),
                     ),
                     const SizedBox(
                       height: 20,
@@ -130,7 +191,7 @@ class _LoginScreenState extends State<LoginScreen>
                       child: ButtonFeira(
                           label: 'Acessar',
                           onPressed: () {
-                            navigateToEventScreen(context);
+                            validateFields(context);
                           }),
                     )
                   ],

@@ -10,45 +10,31 @@ class StandScreen extends StatefulWidget {
   _StandScreenState createState() => _StandScreenState();
 }
 
-enum Groceries { pickles, tomato, lettuce }
-
-Color getRandomColor() {
-  List<Color> colors = [
-    Color(0xfffeb47d),
-    Color(0xff001ead),
-    Color(0xff00f3bb),
-    Color(0xffe85aea),
-    Color(0xff2f47ff),
-    Color(0xff00bbff),
-    Color(0xffff415a),
-    Color.fromARGB(255, 197, 182, 70)
-  ];
-
-  int randomNumber = Random().nextInt(colors.length);
-
-  return colors[randomNumber];
-}
+int _pressedIndex = -1;
+final List<String> entries = <String>[
+  "0",
+  "1",
+  "2",
+  "3",
+  "4",
+  "5",
+  "5",
+  "5",
+  "5",
+  "15",
+  "35",
+  "6",
+  "7",
+  "8",
+  "9"
+];
+final List<int> colorCodes = <int>[600, 500, 100];
 
 class _StandScreenState extends State<StandScreen> {
-  Groceries? _groceryItem = Groceries.pickles;
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Container(
-          margin: const EdgeInsets.only(left: 0),
-          padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 0.0),
-          child: const Text(
-            'SELECIONE O STAND',
-            style: const TextStyle(
-              fontFamily: 'AlegreyaSans',
-              fontSize: 22,
-              fontWeight: FontWeight.bold,
-              color: Colors.black,
-            ),
-          ),
-        ),
         toolbarHeight: 140,
         actions: [
           Container(
@@ -73,70 +59,84 @@ class _StandScreenState extends State<StandScreen> {
             children: [
               const SizedBox(height: 20),
               const Text(
-                'Os Stands estão em ordem alfabética',
+                'Selecione seu STAND',
                 style: const TextStyle(
-                  fontFamily: 'AlegreyaSans',
-                  fontSize: 12,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black,
-                ),
-              ),
-              const SizedBox(height: 20),
-              RadioListTile<Groceries>(
-                value: Groceries.pickles,
-                groupValue: _groceryItem,
-                onChanged: (Groceries? value) {
-                  setState(() {
-                    _groceryItem = value;
-                  });
-                },
-                activeColor: getRandomColor(),
-                title: const Text(
-                  'Pickles',
-                  style: const TextStyle(
                     fontFamily: 'AlegreyaSans',
-                    fontSize: 18,
+                    fontSize: 22,
                     fontWeight: FontWeight.bold,
                     color: Colors.black,
-                  ),
-                ),
-                subtitle: const Text(
-                  "Longer supporting text to demonstrate how the text wraps and how setting 'RadioListTile.isThreeLine = true' aligns the radio to the top vertically with the text.",
-                  style: const TextStyle(
-                    fontFamily: 'AlegreyaSans',
-                    fontSize: 14,
-                    fontWeight: FontWeight.normal,
-                    color: Colors.black87,
-                  ),
-                ),
+                    backgroundColor: Colors.transparent),
               ),
-              RadioListTile<Groceries>(
-                value: Groceries.tomato,
-                groupValue: _groceryItem,
-                activeColor: getRandomColor(),
-                onChanged: (Groceries? value) {
-                  setState(() {
-                    _groceryItem = value;
-                  });
+              const SizedBox(height: 20),
+              Expanded(
+                  child: ListView.separated(
+                padding: const EdgeInsets.all(8),
+                itemCount: entries.length,
+                itemBuilder: (BuildContext context, int index) {
+                  bool isPressed = _pressedIndex == index;
+                  return GestureDetector(
+                    onTap: () {
+                      setState(() {
+                        _pressedIndex = index;
+                      });
+
+                      // Após um pequeno atraso, reseta o estado para remover o efeito de "afundamento"
+                      Future.delayed(const Duration(milliseconds: 200), () {
+                        setState(() {
+                          _pressedIndex = -1; // Reseta o índice após a animação
+                        });
+                      });
+                    },
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 200),
+                      curve: Curves.easeInOut,
+                      margin: const EdgeInsets.symmetric(
+                          vertical: 10, horizontal: 20),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(8),
+                        boxShadow: isPressed
+                            ? [
+                                BoxShadow(
+                                  color: Colors.grey.withOpacity(0.5),
+                                  spreadRadius: 2,
+                                  blurRadius: 5,
+                                  offset:
+                                      const Offset(0, 2), // Sombra mais próxima
+                                ),
+                              ]
+                            : [
+                                BoxShadow(
+                                  color: Colors.grey.withOpacity(0.5),
+                                  spreadRadius: 5,
+                                  blurRadius: 4,
+                                  offset: const Offset(
+                                      6, 10), // Sombra mais distante
+                                ),
+                              ],
+                      ),
+                      transform: isPressed
+                          ? Matrix4.translationValues(
+                              0, 5, 0) // Desce o container
+                          : Matrix4.translationValues(
+                              0, 0, 0), // Posição original
+                      child: ListTile(
+                        title: Center(
+                          child: Text(
+                            entries[index],
+                            style: const TextStyle(
+                              fontSize: 16,
+                              color: Colors.black,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  );
                 },
-                title: const Text('Tomato'),
-                subtitle: const Text(
-                    'Longer supporting text to demonstrate how the text wraps and the radio is centered vertically with the text.'),
-              ),
-              RadioListTile<Groceries>(
-                value: Groceries.lettuce,
-                groupValue: _groceryItem,
-                activeColor: getRandomColor(),
-                onChanged: (Groceries? value) {
-                  setState(() {
-                    _groceryItem = value;
-                  });
-                },
-                title: const Text('Lettuce'),
-                subtitle: const Text(
-                    "Longer supporting text to demonstrate how the text wraps and how setting 'RadioListTile.isThreeLine = true' aligns the radio to the top vertically with the text."),
-                isThreeLine: true,
-              ),
+                separatorBuilder: (BuildContext context, int index) =>
+                    const Divider(),
+              ))
             ],
           )),
     );
@@ -170,12 +170,15 @@ class _StandScreenState extends State<StandScreen> {
               style: TextButton.styleFrom(
                 textStyle: Theme.of(context).textTheme.labelLarge,
               ),
-              child: const Text('Cancelar', style: const TextStyle(
-                fontFamily: 'AlegreyaSans',
-                fontSize: 16,
-                fontWeight: FontWeight.normal,
-                color: Colors.red,
-              ),),
+              child: const Text(
+                'Cancelar',
+                style: const TextStyle(
+                  fontFamily: 'AlegreyaSans',
+                  fontSize: 16,
+                  fontWeight: FontWeight.normal,
+                  color: Colors.red,
+                ),
+              ),
               onPressed: () {
                 Navigator.of(context).pop();
               },
@@ -184,18 +187,21 @@ class _StandScreenState extends State<StandScreen> {
               style: TextButton.styleFrom(
                 textStyle: Theme.of(context).textTheme.labelLarge,
               ),
-              child: const Text('Confirmar', style: const TextStyle(
-                fontFamily: 'AlegreyaSans',
-                fontSize: 16,
-                fontWeight: FontWeight.normal,
-                color: Colors.black,
-              ),),
+              child: const Text(
+                'Confirmar',
+                style: const TextStyle(
+                  fontFamily: 'AlegreyaSans',
+                  fontSize: 16,
+                  fontWeight: FontWeight.normal,
+                  color: Colors.black,
+                ),
+              ),
               onPressed: () {
                 Navigator.of(context).pop();
                 Navigator.push(
-                         context,
-                         MaterialPageRoute(builder: (context) => CameraScreen()),
-                       );
+                  context,
+                  MaterialPageRoute(builder: (context) => CameraScreen()),
+                );
               },
             ),
           ],
