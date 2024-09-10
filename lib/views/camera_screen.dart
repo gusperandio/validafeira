@@ -81,8 +81,10 @@ class _CameraScreenState extends State<CameraScreen>
     super.dispose();
   }
 
-  Future<void> _toggleCamera() async {
-    _isCameraOpen = false;
+  void _toggleCamera() {
+    setState(() {
+      _isCameraOpen = !_isCameraOpen;
+    });
   }
 
   Future<void> _requestCameraPermission() async {
@@ -113,10 +115,11 @@ class _CameraScreenState extends State<CameraScreen>
   readQRCode() async {
     String code = await FlutterBarcodeScanner.scanBarcode(
         "#DC3545", "Cancelar", false, ScanMode.QR);
-  
-      fetchPresenca(code);
-   
+
+    // fetchPresenca(code);
     setState(() => ticket = code != '-1' ? code : 'Não validado');
+   
+    _toggleCamera();
     //_dialogBuilder(context, ticket);
     // Stream<dynamic>? reader = await FlutterBarcodeScanner.getBarcodeStreamReceiver(
     //     "#FFFFFF",

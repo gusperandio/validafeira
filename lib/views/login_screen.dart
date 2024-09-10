@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:validafeira/controllers/fetch_api.dart';
 import 'package:validafeira/views/event_screen.dart';
 import '../widgets/widget_button_feira.dart';
 import '../widgets/widget_text_field.dart';
@@ -77,7 +78,22 @@ class _LoginScreenState extends State<LoginScreen>
         .pushReplacement(MaterialPageRoute(builder: (_) => EventScreen()));
   }
 
-  void validateFields(BuildContext context) {
+  String? validateEmail(String? value) {
+    const pattern = r"(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'"
+        r'*+/=?^_`{|}~-]+)*|"(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21\x23-\x5b\x5d-'
+        r'\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])*")@(?:(?:[a-z0-9](?:[a-z0-9-]*'
+        r'[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\[(?:(?:(2(5[0-5]|[0-4]'
+        r'[0-9])|1[0-9][0-9]|[1-9]?[0-9]))\.){3}(?:(2(5[0-5]|[0-4][0-9])|1[0-9]'
+        r'[0-9]|[1-9]?[0-9])|[a-z0-9-]*[a-z0-9]:(?:[\x01-\x08\x0b\x0c\x0e-\x1f\'
+        r'x21-\x5a\x53-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])+)\])';
+    final regex = RegExp(pattern);
+
+    return value!.isNotEmpty && !regex.hasMatch(value)
+        ? 'Enter a valid email address'
+        : null;
+  }
+
+  void validateFields(BuildContext context) async {
     if (_emailValue.text.isEmpty && _passValue.text.isEmpty) {
       FocusScope.of(context).requestFocus(_emailFocusNode);
       showSnack("Informe seus dados!", context);
@@ -90,8 +106,17 @@ class _LoginScreenState extends State<LoginScreen>
       showSnack("Informe a senha", context);
       FocusScope.of(context).requestFocus(_passwordFocusNode);
       return;
-    } else if (_emailValue.text == "teste" && _passValue.text == "1234") {
-      showSnack("E-mail ou Senha incorretos", context);
+    } else if (validateEmail(_emailValue.text) != null) {
+      showSnack("E-mail inválido!", context);
+      FocusScope.of(context).requestFocus(_emailFocusNode);
+      return;
+    }
+
+    LoginResponse authorization =
+        await fetchLogin(_emailValue.text, _passValue.text);
+
+    if (!authorization.success) {
+      showSnack(authorization.message, context);
       return;
     }
 

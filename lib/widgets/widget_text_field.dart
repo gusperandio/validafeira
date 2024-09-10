@@ -5,7 +5,7 @@ class FieldFeira extends StatelessWidget {
   final bool pass;
   final TextEditingController controller;
   final FocusNode focusNode;
-  
+
   const FieldFeira(
       {super.key,
       required this.label,

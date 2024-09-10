@@ -11,8 +11,9 @@ class StandScreen extends StatefulWidget {
 }
 
 int _pressedIndex = -1;
+int _pressedCheck = -1;
 final List<String> entries = <String>[
-  "0",
+  "Feirinha",
   "1",
   "2",
   "3",
@@ -34,19 +35,6 @@ class _StandScreenState extends State<StandScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        toolbarHeight: 140,
-        actions: [
-          Container(
-            margin: const EdgeInsets.only(left: 0),
-            padding:
-                const EdgeInsets.symmetric(horizontal: 20.0, vertical: 0.0),
-            child: ButtonFeira(
-                label: "Confimar", onPressed: () => {_dialogBuilder(context)}),
-          ),
-        ],
-        backgroundColor: Color(0xfff4f7fe),
-      ),
       body: Container(
           width: double.infinity,
           decoration: const BoxDecoration(
@@ -57,7 +45,20 @@ class _StandScreenState extends State<StandScreen> {
           ),
           child: Column(
             children: [
-              const SizedBox(height: 20),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  Container(
+                    margin: const EdgeInsets.only(top: 80, bottom: 40),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 30.0, vertical: 0.0),
+                    child: ButtonFeira(
+                        label: "Confimar",
+                        onPressed: () => {_dialogBuilder(context)}),
+                  ),
+                ],
+              ),
               const Text(
                 'Selecione seu STAND',
                 style: const TextStyle(
@@ -83,7 +84,10 @@ class _StandScreenState extends State<StandScreen> {
                       // Após um pequeno atraso, reseta o estado para remover o efeito de "afundamento"
                       Future.delayed(const Duration(milliseconds: 200), () {
                         setState(() {
-                          _pressedIndex = -1; // Reseta o índice após a animação
+                          _pressedIndex = -1;
+
+                          _pressedCheck =
+                              index; // Reseta o índice após a animação
                         });
                       });
                     },
@@ -121,21 +125,35 @@ class _StandScreenState extends State<StandScreen> {
                           : Matrix4.translationValues(
                               0, 0, 0), // Posição original
                       child: ListTile(
-                        title: Center(
-                          child: Text(
-                            entries[index],
-                            style: const TextStyle(
-                              fontSize: 16,
-                              color: Colors.black,
+                          title: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const SizedBox(width: 0),
+                          Container(
+                            margin: EdgeInsets.only(left: 50),
+                            child: Text(
+                              entries[index],
+                              style: const TextStyle(
+                                fontSize: 16,
+                                color: Colors.black,
+                              ),
                             ),
                           ),
-                        ),
-                      ),
+                          Opacity(
+                              opacity: _pressedCheck == index ? 1.0 : 0.0,
+                              child: Icon(Icons.check_circle_rounded,
+                                  color: Colors.green[700]))
+                        ],
+                      )),
                     ),
                   );
                 },
                 separatorBuilder: (BuildContext context, int index) =>
-                    const Divider(),
+                    const Divider(
+                        height: 26,
+                        indent: 40,
+                        endIndent: 40,
+                        color: Colors.black38),
               ))
             ],
           )),
@@ -200,7 +218,7 @@ class _StandScreenState extends State<StandScreen> {
                 Navigator.of(context).pop();
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => CameraScreen()),
+                  MaterialPageRoute(builder: (context) => const CameraScreen()),
                 );
               },
             ),
