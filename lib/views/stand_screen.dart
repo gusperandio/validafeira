@@ -94,13 +94,14 @@ class _StandScreenState extends State<StandScreen> {
                         onPressed: () => {
                               if (_stand != "")
                                 {
-                                  if ((_stand != _standCache))
-                                    {_dialogBuilder(context)}
-                                  else
+                                  if ((_stand == _standCache))
                                     {
-                                      showSnack("Selecione um Stand primeiro",
-                                          context)
+                                      Navigator.of(context).pushReplacement(
+                                          MaterialPageRoute(
+                                              builder: (_) => CameraScreen()))
                                     }
+                                  else
+                                    {_dialogBuilder(context)}
                                 }
                               else
                                 {
@@ -287,12 +288,11 @@ class _StandScreenState extends State<StandScreen> {
               ),
               onPressed: () async {
                 await asyncPrefs.setInt('codEspaco', 10);
+                await asyncPrefs.remove('nameStand');
                 await asyncPrefs.setString('nameStand', _stand);
                 Navigator.of(context).pop();
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const CameraScreen()),
-                );
+                Navigator.of(context).pushReplacement(
+                    MaterialPageRoute(builder: (_) => CameraScreen()));
               },
             ),
           ],

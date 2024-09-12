@@ -41,6 +41,16 @@ class _CameraScreenState extends State<CameraScreen>
     generalColor: Colors.white,
   );
 
+  final CustomToastWidget _toastCamera = CustomToastWidget(
+    title: 'Que triste!',
+    description:
+        'Infelizmente não vai ser possível ler o QRCode sem o acesso a sua camêra',
+    typeNow: ToastificationType.info,
+    styleNow: ToastificationStyle.fillColored,
+    iconNow: Icons.camera_enhance_rounded,
+    generalColor: Colors.white,
+  );
+
   final CustomToastWidget _toastError = CustomToastWidget(
     title: 'Eita!',
     description: 'Tivemos algum problema, leia o QRCode novamente!',
@@ -91,14 +101,14 @@ class _CameraScreenState extends State<CameraScreen>
   Future<void> _requestCameraPermission() async {
     var status = await Permission.camera.status;
     if (!status.isGranted) {
-      if (await Permission.camera.request().isGranted) {
-        await _initializeCamera();
-      } else {
-        print('Permissão negada');
+      if (!await Permission.camera.request().isGranted) {
+        _showToast("camera");
+        return;
       }
-    } else {
-      await readQRCode();
     }
+
+    await readQRCode();
+    return;
   }
 
   Future<void> _initializeCamera() async {
@@ -113,44 +123,48 @@ class _CameraScreenState extends State<CameraScreen>
   }
 
   String ticket = "";
+  CustomToastWidget? toastWidget;
   readQRCode() async {
     String code = await FlutterBarcodeScanner.scanBarcode(
         "#DC3545", "Cancelar", false, ScanMode.QR);
 
-    // fetchPresenca(code);
-    setState(() => ticket = code != '-1' ? code : 'Não validado');
+    setState(() {
+      ticket = code != '-1' ? code : 'Não validado';
+      _showToast(ticket);
+    });
 
     _toggleCamera();
-    //_dialogBuilder(context, ticket);
-    // Stream<dynamic>? reader = await FlutterBarcodeScanner.getBarcodeStreamReceiver(
-    //     "#FFFFFF",
-    //     "Cancelar",
-    //     false,
-    //     ScanMode.QR);
+  }
 
-    // if(reader != null) {
-    //   reader.listen((code) {
-    //       if(!tickets.contains(code.toString()) && code != "-1"){
-    //         tickets.add(code.toString());
-    //       }
-    //     });
-    // }
+  void _showToast(String ticket) {
+    setState(() {
+      toastWidget = null;
+    });
+
+    Future.delayed(const Duration(milliseconds: 100), () {
+      setState(() {
+        switch (ticket) {
+          case 'status 202':
+            toastWidget = _toastSuccess;
+            break;
+          case 'status 503':
+            toastWidget = _toastWarning;
+            break;
+          case 'status 500':
+            toastWidget = _toastError;
+            break;
+          case 'camera':
+            toastWidget = _toastCamera;
+            break;
+          default:
+            toastWidget = null;
+        }
+      });
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    Widget toastWidget;
-    switch (ticket) {
-      case 'ok':
-        toastWidget = _toastSuccess;
-        break;
-      case 'carregado':
-        toastWidget = _toastWarning;
-        break;
-      default:
-        toastWidget = _toastError;
-        break;
-    }
     return Scaffold(
       body: Container(
         width: double.infinity,
@@ -253,70 +267,10 @@ class _CameraScreenState extends State<CameraScreen>
               iconSVG: qrCodeON,
               buttonColor: const Color(0xff188754),
             ),
-            toastWidget
+            if (toastWidget != null) toastWidget!,
           ],
         ),
       ),
     );
   }
-
-  // Future<void> _dialogBuilder(BuildContext context, String textOnQRCode) {
-  //   return showDialog<void>(
-  //     context: context,
-  //     builder: (BuildContext context) {
-  //       return AlertDialog(
-  //         titleTextStyle: const TextStyle(
-  //           fontFamily: 'AlegreyaSans',
-  //           fontSize: 22,
-  //           fontWeight: FontWeight.bold,
-  //           color: Colors.black,
-  //         ),
-  //         title: const Text('Conteúdo do seu QRCode'),
-  //         content: Text(textOnQRCode,
-  //             style: const TextStyle(
-  //               fontFamily: 'AlegreyaSans',
-  //               fontSize: 14,
-  //               fontWeight: FontWeight.normal,
-  //               color: Colors.black54,
-  //             )),
-  //         actions: <Widget>[
-  //           TextButton(
-  //             style: TextButton.styleFrom(
-  //               textStyle: Theme.of(context).textTheme.labelLarge,
-  //             ),
-  //             child: const Text(
-  //               'Cancelar',
-  //               style: const TextStyle(
-  //                 fontFamily: 'AlegreyaSans',
-  //                 fontSize: 16,
-  //                 fontWeight: FontWeight.normal,
-  //                 color: Colors.red,
-  //               ),
-  //             ),
-  //             onPressed: () {
-  //               Navigator.of(context).pop();
-  //             },
-  //           ),
-  //           TextButton(
-  //             style: TextButton.styleFrom(
-  //               textStyle: Theme.of(context).textTheme.labelLarge,
-  //             ),
-  //             child: const Text(
-  //               'Confirmar',
-  //               style: const TextStyle(
-  //                 fontFamily: 'AlegreyaSans',
-  //                 fontSize: 16,
-  //                 fontWeight: FontWeight.normal,
-  //                 color: Colors.black,
-  //               ),
-  //             ),
-  //             onPressed: () {
-  //               Navigator.of(context).pop();
-  //             },
-  //           ),
-  //         ],
-  //       );
-  //     },
-  //   );
-  // }
 }
