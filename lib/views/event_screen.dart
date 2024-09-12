@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:validafeira/views/stand_screen.dart';
 import '../widgets/widget_button_feira.dart';
 
 class EventScreen extends StatefulWidget {
+  const EventScreen({super.key});
+
   @override
   _EventScreenState createState() => _EventScreenState();
 }
@@ -13,6 +16,9 @@ class _EventScreenState extends State<EventScreen>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   bool _isClicked = false;
+  
+  final SharedPreferencesAsync asyncPrefs = SharedPreferencesAsync();
+  
   @override
   void initState() {
     super.initState();
@@ -34,7 +40,8 @@ class _EventScreenState extends State<EventScreen>
     });
   }
 
-  void navigateToStandScreen(BuildContext context) {
+  void navigateToStandScreen(BuildContext context) async {
+    await asyncPrefs.setInt('codDisponibilizacao', 10);
     Navigator.of(context)
         .pushReplacement(MaterialPageRoute(builder: (_) => StandScreen()));
   }

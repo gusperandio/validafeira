@@ -8,13 +8,16 @@ class LoginResponse {
   LoginResponse(this.message, this.success);
 }
 
+var header = <String, String>{
+  'Content-Type': 'application/json; charset=UTF-8',
+};
+
 Future<LoginResponse> fetchLogin(String email, String password) async {
   try {
     final resp = await http.post(
-      Uri.parse('http://172.17.96.1/api/v10/profiles/loginValidaFeira'),
-      headers: <String, String>{
-        'Content-Type': 'application/json; charset=UTF-8',
-      },
+      Uri.parse(
+          'https://hom-meusebrae-cms-apps.pr.sebrae.com.br/api/v10/profiles/loginValidaFeira'),
+      headers: header,
       body: jsonEncode(<String, String>{'email': email, 'password': password}),
     );
     var decodedResponse = jsonDecode(utf8.decode(resp.bodyBytes)) as Map;
@@ -29,18 +32,20 @@ Future<LoginResponse> fetchLogin(String email, String password) async {
   }
 }
 
-fetchPresenca(String body) async {
-  var client = http.Client();
+Future<LoginResponse> fetchListStands(String disp) async {
   try {
-    var response = await client.post(
-        Uri.https(
-            'app2hml.pr.sebrae.com.br', 'smart-api/public/presenca/espaco'),
-        body: body);
-    var decodedResponse = jsonDecode(utf8.decode(response.bodyBytes)) as Map;
-
-    var uri = Uri.parse(decodedResponse['uri'] as String);
-    print(await client.get(uri));
-  } finally {
-    client.close();
+    final resp = await http.post(
+        Uri.parse(
+            'http://apihml.pr.sebrae.com.br/smart-api/public/presenca/espaco/listar?disponibilizacao=$disp'),
+        headers: header);
+    var decodedResponse = jsonDecode(utf8.decode(resp.bodyBytes)) as Map;
+    if (resp.statusCode == 200) {
+      return LoginResponse(decodedResponse["ok"], true);
+    } else {
+      return LoginResponse(decodedResponse["erro"], false);
+    }
+  } catch (e) {
+    print(e);
+    return LoginResponse("Erro ao fazer login", false);
   }
 }

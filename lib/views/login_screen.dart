@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:validafeira/controllers/fetch_api.dart';
 import 'package:validafeira/views/event_screen.dart';
 import '../widgets/widget_button_feira.dart';
@@ -22,6 +23,7 @@ class _LoginScreenState extends State<LoginScreen>
   final TextEditingController _passValue = TextEditingController();
   final FocusNode _emailFocusNode = FocusNode();
   final FocusNode _passwordFocusNode = FocusNode();
+  final SharedPreferencesAsync asyncPrefs = SharedPreferencesAsync();
 
   @override
   void initState() {
@@ -120,6 +122,7 @@ class _LoginScreenState extends State<LoginScreen>
       return;
     }
 
+    await asyncPrefs.setBool('logged', true);
     navigateToEventScreen(context);
   }
 

@@ -4,6 +4,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:gradient_borders/box_borders/gradient_box_border.dart';
 import 'package:toastification/toastification.dart';
 import 'package:validafeira/controllers/fetch_api.dart';
+import 'package:validafeira/views/stand_screen.dart';
 import 'package:validafeira/widgets/widget_simple_button.dart';
 import 'package:validafeira/widgets/widget_toast.dart';
 import '../widgets/widget_button_feira.dart';
@@ -118,7 +119,7 @@ class _CameraScreenState extends State<CameraScreen>
 
     // fetchPresenca(code);
     setState(() => ticket = code != '-1' ? code : 'Não validado');
-   
+
     _toggleCamera();
     //_dialogBuilder(context, ticket);
     // Stream<dynamic>? reader = await FlutterBarcodeScanner.getBarcodeStreamReceiver(
@@ -138,6 +139,18 @@ class _CameraScreenState extends State<CameraScreen>
 
   @override
   Widget build(BuildContext context) {
+    Widget toastWidget;
+    switch (ticket) {
+      case 'ok':
+        toastWidget = _toastSuccess;
+        break;
+      case 'carregado':
+        toastWidget = _toastWarning;
+        break;
+      default:
+        toastWidget = _toastError;
+        break;
+    }
     return Scaffold(
       body: Container(
         width: double.infinity,
@@ -162,7 +175,15 @@ class _CameraScreenState extends State<CameraScreen>
                       horizontal: 30.0, vertical: 0.0),
                   child: ButtonFeira(
                     label: "Trocar STAND",
-                    onPressed: () => Navigator.pop(context),
+                    onPressed: () => {
+                      if (Navigator.canPop(context))
+                        {Navigator.pop(context)}
+                      else
+                        {
+                          Navigator.of(context).pushReplacement(
+                              MaterialPageRoute(builder: (_) => StandScreen()))
+                        },
+                    },
                   ),
                 ),
               ],
@@ -232,10 +253,7 @@ class _CameraScreenState extends State<CameraScreen>
               iconSVG: qrCodeON,
               buttonColor: const Color(0xff188754),
             ),
-            const SizedBox(height: 20),
-            _toastWarning,
-            _toastSuccess,
-            _toastError
+            toastWidget
           ],
         ),
       ),

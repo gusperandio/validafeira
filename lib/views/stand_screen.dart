@@ -1,37 +1,72 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_svg/flutter_svg.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:validafeira/views/camera_screen.dart';
 import '../widgets/widget_button_feira.dart';
-import 'dart:math';
 
 class StandScreen extends StatefulWidget {
+  const StandScreen({Key? key}) : super(key: key);
+
   @override
-  _StandScreenState createState() => _StandScreenState();
+  State<StandScreen> createState() => _StandScreenState();
 }
 
-int _pressedIndex = -1;
-int _pressedCheck = -1;
-final List<String> entries = <String>[
-  "Feirinha",
-  "1",
-  "2",
-  "3",
-  "4",
-  "5",
-  "5",
-  "5",
-  "5",
-  "15",
-  "35",
-  "6",
-  "7",
-  "8",
-  "9"
-];
-final List<int> colorCodes = <int>[600, 500, 100];
-
 class _StandScreenState extends State<StandScreen> {
+  final SharedPreferencesAsync asyncPrefs = SharedPreferencesAsync();
+  int _pressedIndex = -1;
+  int _pressedCheck = -1;
+  String _stand = "";
+  String? _standCache;
+  List<String> entries = <String>[
+    "Feirinha",
+    "Arena Sebrae",
+    "Espaço Sebrae",
+    "Sebrae Inovação",
+    "Espaço Expositores",
+    "Patrocinador Prata",
+    "Entidades",
+    "Trilha do Empreendedor",
+    "Produtividade",
+    "Inovação",
+    "Turismo",
+    "Inovação",
+    "Personalização",
+    "Ouvidoria",
+    "Guarda Volumes",
+    "Credenciamento",
+    "PodCast",
+    "Mestre de Negócios",
+    "Canvas Express",
+    "Comece",
+    "ICode",
+    "Alcance",
+    "Espaço Família",
+    "Seja",
+    "Faça",
+    "Rodada de Negócios",
+    "Rodada de Crédito",
+  ];
+  @override
+  void initState() {
+    super.initState();
+    _loadStandCache();
+  }
+
+  Future<void> _loadStandCache() async {
+    _standCache = await asyncPrefs.getString('nameStand');
+
+    if (_standCache != null) {
+      int i = entries.indexOf(_standCache!);
+
+      if (i >= 0) {
+        setState(() {
+          _stand = entries[i];
+          _pressedCheck = i;
+        });
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -50,18 +85,35 @@ class _StandScreenState extends State<StandScreen> {
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
                   Container(
-                    margin: const EdgeInsets.only(top: 80, bottom: 40),
+                    margin:
+                        const EdgeInsets.only(top: 80, bottom: 40, right: 20),
                     padding: const EdgeInsets.symmetric(
                         horizontal: 30.0, vertical: 0.0),
                     child: ButtonFeira(
                         label: "Confimar",
-                        onPressed: () => {_dialogBuilder(context)}),
+                        onPressed: () => {
+                              if (_stand != "")
+                                {
+                                  if ((_stand != _standCache))
+                                    {_dialogBuilder(context)}
+                                  else
+                                    {
+                                      showSnack("Selecione um Stand primeiro",
+                                          context)
+                                    }
+                                }
+                              else
+                                {
+                                  showSnack(
+                                      "Selecione um Stand primeiro", context)
+                                }
+                            }),
                   ),
                 ],
               ),
               const Text(
                 'Selecione seu STAND',
-                style: const TextStyle(
+                style: TextStyle(
                     fontFamily: 'AlegreyaSans',
                     fontSize: 22,
                     fontWeight: FontWeight.bold,
@@ -81,13 +133,11 @@ class _StandScreenState extends State<StandScreen> {
                         _pressedIndex = index;
                       });
 
-                      // Após um pequeno atraso, reseta o estado para remover o efeito de "afundamento"
                       Future.delayed(const Duration(milliseconds: 200), () {
                         setState(() {
                           _pressedIndex = -1;
-
-                          _pressedCheck =
-                              index; // Reseta o índice após a animação
+                          _stand = entries[index];
+                          _pressedCheck = index;
                         });
                       });
                     },
@@ -134,7 +184,9 @@ class _StandScreenState extends State<StandScreen> {
                             child: Text(
                               entries[index],
                               style: const TextStyle(
-                                fontSize: 16,
+                                fontFamily: 'AlegreyaSans',
+                                fontSize: 20,
+                                fontWeight: FontWeight.normal,
                                 color: Colors.black,
                               ),
                             ),
@@ -160,6 +212,27 @@ class _StandScreenState extends State<StandScreen> {
     );
   }
 
+  void showSnack(String text, context) {
+    final snackBar = SnackBar(
+        content: Text(
+          text,
+          style: const TextStyle(
+            fontFamily: 'AlegreyaSans',
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+          ),
+        ),
+        action: SnackBarAction(
+          label: 'Fechar',
+          onPressed: () {},
+          backgroundColor: Colors.black45,
+          textColor: Colors.white,
+        ),
+        backgroundColor: Colors.red[400]);
+    ScaffoldMessenger.of(context).showSnackBar(snackBar);
+  }
+
   Future<void> _dialogBuilder(BuildContext context) {
     return showDialog<void>(
       context: context,
@@ -172,14 +245,12 @@ class _StandScreenState extends State<StandScreen> {
             color: Colors.black,
           ),
           title: const Text('Confirme seu STAND'),
-          content: const Text(
-              'A dialog is a type of modal window that\n'
-              'appears in front of app content to\n'
-              'provide critical information, or prompt\n'
-              'for a decision to be made.',
+          content: Text(
+              'O stand na qual você selecionou é $_stand.\n'
+              'Tem certeza que você está localizado em $_stand',
               style: const TextStyle(
                 fontFamily: 'AlegreyaSans',
-                fontSize: 14,
+                fontSize: 16,
                 fontWeight: FontWeight.normal,
                 color: Colors.black54,
               )),
@@ -214,7 +285,9 @@ class _StandScreenState extends State<StandScreen> {
                   color: Colors.black,
                 ),
               ),
-              onPressed: () {
+              onPressed: () async {
+                await asyncPrefs.setInt('codEspaco', 10);
+                await asyncPrefs.setString('nameStand', _stand);
                 Navigator.of(context).pop();
                 Navigator.push(
                   context,
