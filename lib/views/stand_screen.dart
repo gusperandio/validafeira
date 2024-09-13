@@ -96,9 +96,8 @@ class _StandScreenState extends State<StandScreen> {
                                 {
                                   if ((_stand == _standCache))
                                     {
-                                      Navigator.of(context).pushReplacement(
-                                          MaterialPageRoute(
-                                              builder: (_) => CameraScreen()))
+                                      Navigator.of(context)
+                                          .pushReplacement(_createRoute())
                                     }
                                   else
                                     {_dialogBuilder(context)}
@@ -291,11 +290,31 @@ class _StandScreenState extends State<StandScreen> {
                 await asyncPrefs.remove('nameStand');
                 await asyncPrefs.setString('nameStand', _stand);
                 Navigator.of(context).pop();
-                Navigator.of(context).pushReplacement(
-                    MaterialPageRoute(builder: (_) => CameraScreen()));
+                Navigator.of(context).pushReplacement(_createRoute());
               },
             ),
           ],
+        );
+      },
+    );
+  }
+
+  Route _createRoute() {
+    return PageRouteBuilder(
+      pageBuilder: (context, animation, secondaryAnimation) => const CameraScreen(),
+      transitionsBuilder: (context, animation, secondaryAnimation, child) {
+        const begin =
+            Offset(1.0, 0.0); 
+        const end = Offset.zero;  
+        const curve = Curves.easeInOut;
+
+        var tween =
+            Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
+
+        return SlideTransition(
+          position: animation.drive(
+              tween),  
+          child: child,
         );
       },
     );

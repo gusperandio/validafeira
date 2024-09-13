@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:gradient_borders/box_borders/gradient_box_border.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:toastification/toastification.dart';
-import 'package:validafeira/controllers/fetch_api.dart';
 import 'package:validafeira/views/stand_screen.dart';
 import 'package:validafeira/widgets/widget_simple_button.dart';
 import 'package:validafeira/widgets/widget_toast.dart';
@@ -11,7 +11,6 @@ import '../widgets/widget_button_feira.dart';
 import 'package:camera/camera.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class CameraScreen extends StatefulWidget {
   const CameraScreen({super.key});
@@ -22,6 +21,8 @@ class CameraScreen extends StatefulWidget {
 
 class _CameraScreenState extends State<CameraScreen>
     with SingleTickerProviderStateMixin {
+  final SharedPreferencesAsync asyncPrefs = SharedPreferencesAsync();
+  String? _standCache;
   final CustomToastWidget _toastSuccess = CustomToastWidget(
     title: 'Beleza!!!',
     description: 'Presenças registradas com sucesso.',
@@ -79,6 +80,7 @@ class _CameraScreenState extends State<CameraScreen>
   @override
   void initState() {
     super.initState();
+    _loadStandCache();
     _controller = AnimationController(
       duration: const Duration(seconds: 3),
       vsync: this,
@@ -96,6 +98,16 @@ class _CameraScreenState extends State<CameraScreen>
     setState(() {
       _isCameraOpen = !_isCameraOpen;
     });
+  }
+
+  Future<void> _loadStandCache() async {
+    String? _cache = await asyncPrefs.getString('nameStand');
+
+    if (_cache != null) {
+      setState(() {
+        _standCache = _cache;
+      });
+    }
   }
 
   Future<void> _requestCameraPermission() async {
@@ -190,20 +202,33 @@ class _CameraScreenState extends State<CameraScreen>
                   child: ButtonFeira(
                     label: "Trocar STAND",
                     onPressed: () => {
-                      if (Navigator.canPop(context))
-                        {Navigator.pop(context)}
-                      else
-                        {
-                          Navigator.of(context).pushReplacement(
-                              MaterialPageRoute(builder: (_) => StandScreen()))
-                        },
+                      Navigator.of(context).pushReplacement(_createRoute()),
                     },
                   ),
                 ),
               ],
             ),
+            const Text(
+              'Leitura sendo registrada em',
+              style: TextStyle(
+                  fontFamily: 'AlegreyaSans',
+                  fontSize: 22,
+                  fontWeight: FontWeight.normal,
+                  color: Colors.black,
+                  backgroundColor: Colors.transparent),
+            ),
+            Text(
+              _standCache ?? "",
+              style: const TextStyle(
+                  fontFamily: 'AlegreyaSans',
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                  decoration: TextDecoration.underline,
+                  color: Colors.black,
+                  backgroundColor: Colors.transparent),
+            ),
             Container(
-              margin: const EdgeInsets.only(top: 80),
+              margin: const EdgeInsets.only(top: 20),
               decoration: BoxDecoration(
                 color: Colors.transparent,
                 borderRadius: BorderRadius.circular(6),
@@ -271,6 +296,26 @@ class _CameraScreenState extends State<CameraScreen>
           ],
         ),
       ),
+    );
+  }
+
+  Route _createRoute() {
+    return PageRouteBuilder(
+      pageBuilder: (context, animation, secondaryAnimation) =>
+          const StandScreen(),
+      transitionsBuilder: (context, animation, secondaryAnimation, child) {
+        const begin = Offset(-1.0, 0.0);
+        const end = Offset.zero;
+        const curve = Curves.easeInOut;
+
+        var tween =
+            Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
+
+        return SlideTransition(
+          position: animation.drive(tween),
+          child: child,
+        );
+      },
     );
   }
 }
