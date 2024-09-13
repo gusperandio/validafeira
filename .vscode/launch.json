@@ -5,18 +5,18 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Valida Feira",
+      "name": "Valida Sebrae",
       "request": "launch",
       "type": "dart"
     },
     {
-      "name": "validafeira (profile mode)",
+      "name": "validasebrae (profile mode)",
       "request": "launch",
       "type": "dart",
       "flutterMode": "profile"
     },
     {
-      "name": "validafeira (release mode)",
+      "name": "validasebrae (release mode)",
       "request": "launch",
       "type": "dart",
       "flutterMode": "release"

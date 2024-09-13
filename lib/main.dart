@@ -1,21 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:validafeira/views/camera_screen.dart';
-import 'package:validafeira/views/event_screen.dart';
-import 'package:validafeira/views/login_screen.dart';
+import 'package:validasebrae/views/camera_screen.dart';
+import 'package:validasebrae/views/event_screen.dart';
+import 'package:validasebrae/views/login_screen.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:validafeira/views/stand_screen.dart';
+import 'package:validasebrae/views/stand_screen.dart';
 
 Future main() async {
   //WidgetsFlutterBinding.ensureInitialized();
   await dotenv.load(fileName: ".env");
-  runApp(ValidaFeira());
+  runApp(ValidaSebrae());
 }
 
 final SharedPreferencesAsync asyncPrefs = SharedPreferencesAsync();
 
-class ValidaFeira extends StatelessWidget {
-  ValidaFeira({super.key});
+class ValidaSebrae extends StatelessWidget {
+  ValidaSebrae({super.key});
 
   Future<String> checkPersistence() async {
     if (await asyncPrefs.getBool('logged') == null) {
@@ -36,7 +36,7 @@ class ValidaFeira extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Valida Feira',
+      title: 'Valida Sebrae',
       // theme: ThemeData(
       //   colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
       //   useMaterial3: true,

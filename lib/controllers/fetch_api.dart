@@ -10,6 +10,7 @@ class LoginResponse {
 
 var header = <String, String>{
   'Content-Type': 'application/json; charset=UTF-8',
+  'Accept': 'application/json',
 };
 
 Future<LoginResponse> fetchLogin(String email, String password) async {
@@ -47,5 +48,37 @@ Future<LoginResponse> fetchListStands(String disp) async {
   } catch (e) {
     print(e);
     return LoginResponse("Erro ao fazer login", false);
+  }
+}
+
+Future<bool> fetchPresencaLote(List<String> dispList) async {
+  try {
+    final requestBody = jsonEncode({dispList});
+    final resp = await http.post(Uri.parse('http://apihml.teste.com'),
+        headers: header, body: requestBody);
+    var decodedResponse = jsonDecode(utf8.decode(resp.bodyBytes)) as Map;
+    if (resp.statusCode == 200) {
+      return true;
+    } else {
+      return false;
+    }
+  } catch (e) {
+    return false;
+  }
+}
+
+Future<bool> fetchPresenca(String disp) async {
+  try {
+    final requestBody = jsonEncode({disp});
+    final resp = await http.post(Uri.parse('http://apihml.teste.com'),
+        headers: header, body: requestBody);
+    var decodedResponse = jsonDecode(utf8.decode(resp.bodyBytes)) as Map;
+    if (resp.statusCode == 200) {
+      return true;
+    } else {
+      return false;
+    }
+  } catch (e) {
+    return false;
   }
 }

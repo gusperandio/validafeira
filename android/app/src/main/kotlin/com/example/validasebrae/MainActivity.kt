@@ -1,4 +1,4 @@
-package com.example.validafeira
+package com.example.validasebrae
 
 import io.flutter.embedding.android.FlutterActivity
 

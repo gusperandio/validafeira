@@ -4,9 +4,11 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:gradient_borders/box_borders/gradient_box_border.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:toastification/toastification.dart';
-import 'package:validafeira/views/stand_screen.dart';
-import 'package:validafeira/widgets/widget_simple_button.dart';
-import 'package:validafeira/widgets/widget_toast.dart';
+import 'package:validasebrae/cache/load_lote_qrcode.dart';
+import 'package:validasebrae/controllers/fetch_api.dart';
+import 'package:validasebrae/views/stand_screen.dart';
+import 'package:validasebrae/widgets/widget_simple_button.dart';
+import 'package:validasebrae/widgets/widget_toast.dart';
 import '../widgets/widget_button_feira.dart';
 import 'package:camera/camera.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -123,26 +125,30 @@ class _CameraScreenState extends State<CameraScreen>
     return;
   }
 
-  Future<void> _initializeCamera() async {
-    final cameras = await availableCameras();
-    final camera = cameras.first;
-
-    _cameraController = CameraController(camera, ResolutionPreset.high);
-    _initializeControllerFuture = _cameraController!.initialize();
-    setState(() {
-      _isCameraOpen = true;
-    });
-  }
-
-  String ticket = "";
   CustomToastWidget? toastWidget;
   readQRCode() async {
+    String ticket = "";
+    bool resp;
     String code = await FlutterBarcodeScanner.scanBarcode(
         "#DC3545", "Cancelar", false, ScanMode.QR);
+    ticket = code != '-1' ? code : 'Não validado';
+
+    ListQRCODES ListQRCode = ListQRCODES();
+    List<String> lotes = await ListQRCode.getReadQRs();
+
+    if (lotes.length > 0) {
+      await ListQRCode.setReadQRs(ticket, lotes);
+      lotes.add(ticket);
+      resp = await fetchPresencaLote(lotes);
+    } else {
+      resp = await fetchPresenca(ticket);
+      if (!resp) {
+        await ListQRCode.setReadQRs(ticket, lotes);
+      }
+    }
 
     setState(() {
-      ticket = code != '-1' ? code : 'Não validado';
-      _showToast(ticket);
+      resp ? _showToast("ok") : _showToast("warning");
     });
 
     _toggleCamera();
@@ -156,10 +162,10 @@ class _CameraScreenState extends State<CameraScreen>
     Future.delayed(const Duration(milliseconds: 100), () {
       setState(() {
         switch (ticket) {
-          case 'status 202':
+          case 'ok':
             toastWidget = _toastSuccess;
             break;
-          case 'status 503':
+          case 'warning':
             toastWidget = _toastWarning;
             break;
           case 'status 500':

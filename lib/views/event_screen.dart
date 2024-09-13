@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:validafeira/views/stand_screen.dart';
+import 'package:validasebrae/views/stand_screen.dart';
 import '../widgets/widget_button_feira.dart';
 
 class EventScreen extends StatefulWidget {

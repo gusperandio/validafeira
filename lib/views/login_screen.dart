@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:validafeira/controllers/fetch_api.dart';
-import 'package:validafeira/views/event_screen.dart';
+import 'package:validasebrae/controllers/fetch_api.dart';
+import 'package:validasebrae/views/event_screen.dart';
 import '../widgets/widget_button_feira.dart';
 import '../widgets/widget_text_field.dart';
 
