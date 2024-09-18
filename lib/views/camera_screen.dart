@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:gradient_borders/box_borders/gradient_box_border.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:toastification/toastification.dart';
-import 'package:validasebrae/cache/load_lote_qrcode.dart';
+import 'package:validasebrae/cache/load_lote_presenca.dart';
 import 'package:validasebrae/controllers/fetch_api.dart';
 import 'package:validasebrae/views/stand_screen.dart';
 import 'package:validasebrae/widgets/widget_simple_button.dart';
@@ -13,6 +12,7 @@ import '../widgets/widget_button_feira.dart';
 import 'package:camera/camera.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class CameraScreen extends StatefulWidget {
   const CameraScreen({super.key});
@@ -25,6 +25,7 @@ class _CameraScreenState extends State<CameraScreen>
     with SingleTickerProviderStateMixin {
   final SharedPreferencesAsync asyncPrefs = SharedPreferencesAsync();
   String? _standCache;
+  String? codDisp = dotenv.env['DISP_COD'];
   final CustomToastWidget _toastSuccess = CustomToastWidget(
     title: 'Beleza!!!',
     description: 'Presenças registradas com sucesso.',
@@ -50,7 +51,7 @@ class _CameraScreenState extends State<CameraScreen>
         'Infelizmente não vai ser possível ler o QRCode sem o acesso a sua camêra',
     typeNow: ToastificationType.info,
     styleNow: ToastificationStyle.fillColored,
-    iconNow: Icons.camera_enhance_rounded,
+    iconNow: Icons.sentiment_dissatisfied_rounded,
     generalColor: Colors.white,
   );
 
@@ -65,7 +66,6 @@ class _CameraScreenState extends State<CameraScreen>
 
   late AnimationController _controller;
   CameraController? _cameraController;
-  Future<void>? _initializeControllerFuture;
   bool _isCameraOpen = false;
   SvgPicture qrCodeON = SvgPicture.asset(
     'assets/svg/qrcode-on.svg',
@@ -127,31 +127,45 @@ class _CameraScreenState extends State<CameraScreen>
 
   CustomToastWidget? toastWidget;
   readQRCode() async {
-    String ticket = "";
-    bool resp;
-    String code = await FlutterBarcodeScanner.scanBarcode(
-        "#DC3545", "Cancelar", false, ScanMode.QR);
-    ticket = code != '-1' ? code : 'Não validado';
+    try {
+      String ticket = "";
+      bool resp;
+      String code = await FlutterBarcodeScanner.scanBarcode(
+          "#DC3545", "Cancelar", false, ScanMode.QR);
+      ticket = code != '-1' ? code : 'Não validado';
 
-    ListQRCODES ListQRCode = ListQRCODES();
-    List<String> lotes = await ListQRCode.getReadQRs();
+      if (code != '-1') {
+        var actual = PresentRequest(
+            codDisponibilizacao: int.parse(codDisp!),
+            codEspaco: await asyncPrefs.getInt('codStand') ?? 0,
+            qrCode: code,
+            codAgente: await asyncPrefs.getInt('codAgente') ?? 467);
 
-    if (lotes.length > 0) {
-      await ListQRCode.setReadQRs(ticket, lotes);
-      lotes.add(ticket);
-      resp = await fetchPresencaLote(lotes);
-    } else {
-      resp = await fetchPresenca(ticket);
-      if (!resp) {
-        await ListQRCode.setReadQRs(ticket, lotes);
+        ListPresent listUse = ListPresent();
+        List<PresentRequest> lotes = await listUse.getPresents();
+        if (lotes.length > 0) {
+          lotes.add(actual);
+          resp = await fetchPresencaLote(lotes);
+
+          if (resp) {
+            await listUse.deletePresents();
+          } else {
+            await listUse.setPresents(actual);
+          }
+        } else {
+          resp = await fetchPresenca(actual);
+          if (!resp) await listUse.setPresents(actual);
+        }
+
+        setState(() {
+          resp ? _showToast("ok") : _showToast("warning");
+        });
+
+        _toggleCamera();
       }
+    } catch (e) {
+      _showToast("error");
     }
-
-    setState(() {
-      resp ? _showToast("ok") : _showToast("warning");
-    });
-
-    _toggleCamera();
   }
 
   void _showToast(String ticket) {
@@ -168,7 +182,7 @@ class _CameraScreenState extends State<CameraScreen>
           case 'warning':
             toastWidget = _toastWarning;
             break;
-          case 'status 500':
+          case 'error':
             toastWidget = _toastError;
             break;
           case 'camera':

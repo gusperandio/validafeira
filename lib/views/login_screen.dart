@@ -100,15 +100,21 @@ class _LoginScreenState extends State<LoginScreen>
       FocusScope.of(context).requestFocus(_emailFocusNode);
       showSnack("Informe seus dados!", context);
       return;
-    } else if (_emailValue.text.isEmpty) {
+    }
+
+    if (_emailValue.text.isEmpty) {
       showSnack("Informe o email", context);
       FocusScope.of(context).requestFocus(_emailFocusNode);
       return;
-    } else if (_passValue.text.isEmpty) {
+    }
+
+    if (_passValue.text.isEmpty) {
       showSnack("Informe a senha", context);
       FocusScope.of(context).requestFocus(_passwordFocusNode);
       return;
-    } else if (validateEmail(_emailValue.text) != null) {
+    }
+
+    if (validateEmail(_emailValue.text) != null) {
       showSnack("E-mail inválido!", context);
       FocusScope.of(context).requestFocus(_emailFocusNode);
       return;
@@ -122,8 +128,10 @@ class _LoginScreenState extends State<LoginScreen>
       return;
     }
 
+    await asyncPrefs.setInt('codAgente', authorization.codAgente);
     await asyncPrefs.setBool('logged', true);
     navigateToEventScreen(context);
+    return;
   }
 
   void showSnack(String text, context) {

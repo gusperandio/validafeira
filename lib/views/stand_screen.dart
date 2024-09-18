@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:validasebrae/controllers/fetch_api.dart';
 import 'package:validasebrae/views/camera_screen.dart';
 import '../widgets/widget_button_feira.dart';
 
@@ -16,51 +17,35 @@ class _StandScreenState extends State<StandScreen> {
   int _pressedIndex = -1;
   int _pressedCheck = -1;
   String _stand = "";
+  int _standCod = 0;
   String? _standCache;
-  List<String> entries = <String>[
-    "Feirinha",
-    "Arena Sebrae",
-    "Espaço Sebrae",
-    "Sebrae Inovação",
-    "Espaço Expositores",
-    "Patrocinador Prata",
-    "Entidades",
-    "Trilha do Empreendedor",
-    "Produtividade",
-    "Inovação",
-    "Turismo",
-    "Inovação",
-    "Personalização",
-    "Ouvidoria",
-    "Guarda Volumes",
-    "Credenciamento",
-    "PodCast",
-    "Mestre de Negócios",
-    "Canvas Express",
-    "Comece",
-    "ICode",
-    "Alcance",
-    "Espaço Família",
-    "Seja",
-    "Faça",
-    "Rodada de Negócios",
-    "Rodada de Crédito",
-  ];
+  List<DispResponse> entries = [];
+
   @override
   void initState() {
     super.initState();
+    _loadStands();
+  }
+
+  _loadStands() async {
+    var listStands = await fetchListStands();
+
+    setState(() {
+      entries = listStands!;
+    });
+
     _loadStandCache();
   }
 
   Future<void> _loadStandCache() async {
     _standCache = await asyncPrefs.getString('nameStand');
 
-    if (_standCache != null) {
-      int i = entries.indexOf(_standCache!);
+    if (_standCache != null || entries.length == 0) {
+      int i = entries.indexWhere((entry) => entry.dscEspaco == _standCache);
 
       if (i >= 0) {
         setState(() {
-          _stand = entries[i];
+          _stand = entries[i].dscEspaco;
           _pressedCheck = i;
         });
       }
@@ -136,7 +121,8 @@ class _StandScreenState extends State<StandScreen> {
                       Future.delayed(const Duration(milliseconds: 200), () {
                         setState(() {
                           _pressedIndex = -1;
-                          _stand = entries[index];
+                          _stand = entries[index].dscEspaco;
+                          _standCod = entries[index].codEspaco;
                           _pressedCheck = index;
                         });
                       });
@@ -182,7 +168,7 @@ class _StandScreenState extends State<StandScreen> {
                           Container(
                             margin: EdgeInsets.only(left: 50),
                             child: Text(
-                              entries[index],
+                              entries[index].dscEspaco,
                               style: const TextStyle(
                                 fontFamily: 'AlegreyaSans',
                                 fontSize: 20,
@@ -286,7 +272,7 @@ class _StandScreenState extends State<StandScreen> {
                 ),
               ),
               onPressed: () async {
-                await asyncPrefs.setInt('codEspaco', 10);
+                await asyncPrefs.setInt('codStand', _standCod);
                 await asyncPrefs.remove('nameStand');
                 await asyncPrefs.setString('nameStand', _stand);
                 Navigator.of(context).pop();
@@ -301,19 +287,18 @@ class _StandScreenState extends State<StandScreen> {
 
   Route _createRoute() {
     return PageRouteBuilder(
-      pageBuilder: (context, animation, secondaryAnimation) => const CameraScreen(),
+      pageBuilder: (context, animation, secondaryAnimation) =>
+          const CameraScreen(),
       transitionsBuilder: (context, animation, secondaryAnimation, child) {
-        const begin =
-            Offset(1.0, 0.0); 
-        const end = Offset.zero;  
+        const begin = Offset(1.0, 0.0);
+        const end = Offset.zero;
         const curve = Curves.easeInOut;
 
         var tween =
             Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
 
         return SlideTransition(
-          position: animation.drive(
-              tween),  
+          position: animation.drive(tween),
           child: child,
         );
       },

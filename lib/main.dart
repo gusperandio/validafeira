@@ -26,7 +26,7 @@ class ValidaSebrae extends StatelessWidget {
       return "disp";
     }
 
-    if (await asyncPrefs.getInt('codEspaco') == null) {
+    if (await asyncPrefs.getInt('codStand') == null) {
       return "stand";
     }
 
@@ -45,17 +45,13 @@ class ValidaSebrae extends StatelessWidget {
       home: FutureBuilder<String>(
         future: checkPersistence(),
         builder: (context, snapshot) {
-          if (snapshot.data == "login" || snapshot.data == null) {
-            return LoginScreen();
-          } else if (snapshot.data == "disp") {
-            return EventScreen();
-          } else if (snapshot.data == "stand") {
-            return StandScreen();
-          } else if (snapshot.data == "jump") {
-            return CameraScreen();
-          } else {
-            return LoginScreen();
-          }
+          if (snapshot.data == "disp") return EventScreen();
+
+          if (snapshot.data == "stand") return StandScreen();
+
+          if (snapshot.data == "jump") return CameraScreen();
+
+          return LoginScreen();
         },
       ),
     );
