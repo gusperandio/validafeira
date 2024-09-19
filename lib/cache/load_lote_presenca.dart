@@ -19,7 +19,7 @@ class ListPresent {
     try {
       List<String> presentList = await cache.getStringList('PresentList') ?? [];
       presentList.add(objectToJsonString(data));
-      await cache.setStringList('qrList', presentList);
+      await cache.setStringList('PresentList', presentList);
       return true;
     } catch (e) {
       return false;
@@ -27,7 +27,7 @@ class ListPresent {
   }
 
   Future<void> deletePresents() async {
-    await cache.remove('qrList');
+    await cache.remove('PresentList');
   }
 
   PresentRequest jsonStringToObject(String jsonString) {

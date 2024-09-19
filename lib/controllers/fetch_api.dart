@@ -61,7 +61,7 @@ Future<LoginResponse> fetchLogin(String email, String password) async {
       body: jsonEncode(<String, String>{'email': email, 'password': password}),
     );
     var decodedResponse = jsonDecode(utf8.decode(resp.bodyBytes)) as Map;
-    if (resp.statusCode == 200) {  
+    if (resp.statusCode == 200) {
       return LoginResponse(
           decodedResponse["ok"], true, decodedResponse["codAgente"] ?? 467);
     } else {
@@ -126,8 +126,6 @@ Future<bool> fetchPresenca(PresentRequest disp) async {
         headers: header,
         body: jsonEncode(disp.toJson()));
     if (resp.statusCode == 200) {
-      var decodedResponse =
-          jsonDecode(utf8.decode(resp.bodyBytes)) as Map<String, dynamic>;
       return true;
     } else {
       return false;

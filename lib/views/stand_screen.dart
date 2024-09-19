@@ -70,8 +70,7 @@ class _StandScreenState extends State<StandScreen> {
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
                   Container(
-                    margin:
-                        const EdgeInsets.only(top: 80, bottom: 40, right: 20),
+                    margin: const EdgeInsets.only(top: 80, bottom: 40),
                     padding: const EdgeInsets.symmetric(
                         horizontal: 30.0, vertical: 0.0),
                     child: ButtonFeira(

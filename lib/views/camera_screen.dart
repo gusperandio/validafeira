@@ -24,6 +24,7 @@ class CameraScreen extends StatefulWidget {
 class _CameraScreenState extends State<CameraScreen>
     with SingleTickerProviderStateMixin {
   final SharedPreferencesAsync asyncPrefs = SharedPreferencesAsync();
+
   String? _standCache;
   String? codDisp = dotenv.env['DISP_COD'];
   final CustomToastWidget _toastSuccess = CustomToastWidget(
@@ -135,26 +136,29 @@ class _CameraScreenState extends State<CameraScreen>
       ticket = code != '-1' ? code : 'Não validado';
 
       if (code != '-1') {
+        int codEspaco = await asyncPrefs.getInt('codStand') ?? 0;
+        int codAgente = await asyncPrefs.getInt('codAgente') ?? 467;
+
         var actual = PresentRequest(
             codDisponibilizacao: int.parse(codDisp!),
-            codEspaco: await asyncPrefs.getInt('codStand') ?? 0,
+            codEspaco: codEspaco,
             qrCode: code,
-            codAgente: await asyncPrefs.getInt('codAgente') ?? 467);
+            codAgente: codAgente);
 
-        ListPresent listUse = ListPresent();
-        List<PresentRequest> lotes = await listUse.getPresents();
+        ListPresent listPresentToUse = ListPresent();
+        List<PresentRequest> lotes = await listPresentToUse.getPresents();
         if (lotes.length > 0) {
           lotes.add(actual);
           resp = await fetchPresencaLote(lotes);
 
           if (resp) {
-            await listUse.deletePresents();
+            await listPresentToUse.deletePresents();
           } else {
-            await listUse.setPresents(actual);
+            await listPresentToUse.setPresents(actual);
           }
         } else {
           resp = await fetchPresenca(actual);
-          if (!resp) await listUse.setPresents(actual);
+          if (!resp) await listPresentToUse.setPresents(actual);
         }
 
         setState(() {
