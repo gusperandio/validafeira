@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:core';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:validasebrae/controllers/fetch_api.dart';
+import 'package:validasebrae/models/request/PresentRequest.dart';
 
 final SharedPreferencesAsync cache = SharedPreferencesAsync();
 

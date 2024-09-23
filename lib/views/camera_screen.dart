@@ -5,6 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:toastification/toastification.dart';
 import 'package:validasebrae/cache/load_lote_presenca.dart';
 import 'package:validasebrae/controllers/fetch_api.dart';
+import 'package:validasebrae/models/request/PresentRequest.dart';
 import 'package:validasebrae/views/stand_screen.dart';
 import 'package:validasebrae/widgets/widget_simple_button.dart';
 import 'package:validasebrae/widgets/widget_toast.dart';
@@ -129,11 +130,9 @@ class _CameraScreenState extends State<CameraScreen>
   CustomToastWidget? toastWidget;
   readQRCode() async {
     try {
-      String ticket = "";
       bool resp;
       String code = await FlutterBarcodeScanner.scanBarcode(
           "#DC3545", "Cancelar", false, ScanMode.QR);
-      ticket = code != '-1' ? code : 'Não validado';
 
       if (code != '-1') {
         int codEspaco = await asyncPrefs.getInt('codStand') ?? 0;

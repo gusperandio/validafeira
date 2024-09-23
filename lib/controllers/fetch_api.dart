@@ -1,62 +1,23 @@
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
+import 'package:validasebrae/models/request/PresentRequest.dart';
+import 'package:validasebrae/models/response/DispResponse.dart';
 import 'dart:convert';
 
-class LoginResponse {
-  final String message;
-  final bool success;
-  final int codAgente;
-
-  LoginResponse(this.message, this.success, this.codAgente);
-}
-
-class DispResponse {
-  final String dscEspaco;
-  final int codEspaco;
-
-  DispResponse(this.dscEspaco, this.codEspaco);
-}
-
-class PresentRequest {
-  final int codDisponibilizacao;
-  final int codEspaco;
-  final String qrCode;
-  final int codAgente;
-
-  PresentRequest(
-      {required this.codDisponibilizacao,
-      required this.codEspaco,
-      required this.qrCode,
-      required this.codAgente});
-
-  factory PresentRequest.fromJson(Map<String, dynamic> json) {
-    return PresentRequest(
-        codDisponibilizacao: json['codDisponibilizacao'],
-        codEspaco: json['codEspaco'],
-        qrCode: json['qrCode'],
-        codAgente: json['codAgente']);
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'codDisponibilizacao': codDisponibilizacao,
-      'codEspaco': codEspaco,
-      'qrCode': qrCode,
-      'codAgente': codAgente
-    };
-  }
-}
+import 'package:validasebrae/models/response/LoginResponse.dart';
 
 var header = <String, String>{
   'Content-Type': 'application/json; charset=UTF-8',
   'Accept': 'application/json',
 };
 
+String urlCMS = dotenv.env['LOGIN_URL']!;
+String url = dotenv.env['API_URL']!;
+
 Future<LoginResponse> fetchLogin(String email, String password) async {
   try {
     final resp = await http.post(
-      Uri.parse(
-          'https://hom-meusebrae-cms-apps.pr.sebrae.com.br/api/v10/profiles/loginValidaFeira'),
+      Uri.parse('$urlCMS'),
       headers: header,
       body: jsonEncode(<String, String>{'email': email, 'password': password}),
     );
@@ -75,10 +36,9 @@ Future<LoginResponse> fetchLogin(String email, String password) async {
 
 Future<List<DispResponse>?> fetchListStands() async {
   try {
-    var disp = dotenv.env['DISP_COD'] ?? "123456";
     final resp = await http.get(
       Uri.parse(
-          'http://apihml.pr.sebrae.com.br/smart-api/public/presenca/espaco/listar?disponibilizacao=$disp'),
+          '$url' + dotenv.env['PARAMS_LISTAR']! + dotenv.env['DISP_COD']!),
       headers: header,
     );
 
@@ -102,11 +62,8 @@ Future<bool> fetchPresencaLote(List<PresentRequest> dispList) async {
     List<Map<String, dynamic>> jsonArray =
         dispList.map((disp) => disp.toJson()).toList();
 
-    final resp = await http.post(
-        Uri.parse(
-            'http://apihml.pr.sebrae.com.br/smart-api/public/presenca/espaco/lote'),
-        headers: header,
-        body: jsonEncode(jsonArray));
+    final resp = await http.post(Uri.parse('$url' + dotenv.env['PARAMS_LOTE']!),
+        headers: header, body: jsonEncode(jsonArray));
 
     if (resp.statusCode == 200) {
       return true;
@@ -121,8 +78,7 @@ Future<bool> fetchPresencaLote(List<PresentRequest> dispList) async {
 Future<bool> fetchPresenca(PresentRequest disp) async {
   try {
     final resp = await http.post(
-        Uri.parse(
-            'http://apihml.pr.sebrae.com.br/smart-api/public/presenca/espaco/presenca'),
+        Uri.parse('$url' + dotenv.env['PARAMS_PRESENCA']!),
         headers: header,
         body: jsonEncode(disp.toJson()));
     if (resp.statusCode == 200) {
