@@ -14,6 +14,7 @@ import 'package:camera/camera.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
 
 class CameraScreen extends StatefulWidget {
   const CameraScreen({super.key});
@@ -28,6 +29,7 @@ class _CameraScreenState extends State<CameraScreen>
 
   String? _standCache;
   String? codDisp = dotenv.env['DISP_COD'];
+  bool _hasConnection = false;
   final CustomToastWidget _toastSuccess = CustomToastWidget(
     title: 'Beleza!!!',
     description: 'Presenças registradas com sucesso.',
@@ -85,6 +87,7 @@ class _CameraScreenState extends State<CameraScreen>
   void initState() {
     super.initState();
     _loadStandCache();
+    _checkConnection();
     _controller = AnimationController(
       duration: const Duration(seconds: 3),
       vsync: this,
@@ -146,6 +149,19 @@ class _CameraScreenState extends State<CameraScreen>
 
         ListPresent listPresentToUse = ListPresent();
         List<PresentRequest> lotes = await listPresentToUse.getPresents();
+
+        await _checkConnection();
+        if (!_hasConnection) {
+          lotes.add(actual);
+          await listPresentToUse.setPresents(actual);
+          setState(() {
+            _showToast("warning");
+          });
+
+          _toggleCamera();
+          return;
+        }
+
         if (lotes.length > 0) {
           lotes.add(actual);
           resp = await fetchPresencaLote(lotes);
@@ -195,6 +211,13 @@ class _CameraScreenState extends State<CameraScreen>
             toastWidget = null;
         }
       });
+    });
+  }
+
+  Future<void> _checkConnection() async {
+    var connectivityResult = await (Connectivity().checkConnectivity());
+    setState(() { 
+      _hasConnection = connectivityResult.contains(ConnectivityResult.mobile) || connectivityResult.contains(ConnectivityResult.wifi);
     });
   }
 
